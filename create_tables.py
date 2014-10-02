@@ -53,3 +53,5 @@ c.execute('''CREATE TABLE L2
 			PARdiff double,
 			APARpct double,
 			ZL double)''')
+			
+conn.commit()
