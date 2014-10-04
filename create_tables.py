@@ -1,5 +1,5 @@
 import sqlite3
-def create_L2_tables(db):
+def create_tables(db):
     conn = sqlite3.connect(db)
     c = conn.cursor()
 
@@ -10,7 +10,7 @@ def create_L2_tables(db):
 
     c.execute('''CREATE TABLE L2
 			(ID INTEGER primary key,
-			site_id REFERENCES sites(id),
+			site_id REFERENCES sites(ID),
 			YEAR int,
 			GAP int,
 			DTIME double,
@@ -56,5 +56,44 @@ def create_L2_tables(db):
 			PARdif double,
 			APARpct double,
 			ZL double)''')
+
+    c.execute('''CREATE TABLE L4_h
+      (ID INTEGER primary key,
+      site_id REFERENCES sites(ID),
+      Year int,
+      Month int,
+      Day int,
+      Hour double,
+      DoY double,
+      Rg_f double,
+      Rg_fqc int,
+      Ta_f double,
+      Ta_fqc int,
+      VPD_f double,
+      VPD_fqc int,
+      Ts_f double,
+      Ts_fqc int,
+      Precip double,
+      SWC int,
+      H_f double,
+      H_fqc int,
+      LE_f double,
+      LE_fqc int,
+      gf_NEE_st int,
+      gf_NEE_or int,
+      Reco_st double,
+      Reco_or double,
+      NEE_st_fMDS double,
+      NEE_st_fMDSqc int,
+      GPP_st_MDS double,
+      NEE_or_fMDS double,
+      NEE_or_fMDSqc int,
+      GPP_or_MDS double,
+      NEE_st_fANN double,
+      NEE_st_fANNqc int,
+      GPP_st_ANN double,
+      NEE_or_fANN double,
+      NEE_or_fANNqc int,
+      GPP_or_ANN double);''')
 
     conn.commit()

@@ -33,17 +33,17 @@ def create_site(db,site,codename):
 def import_L2_data(db,data_path,codename):
 	#Inserts L2 data into an sqlite3 db.
 
-    #Create a connecton to the database.
-    conn,cursor = db_connect(db)
+	#Create a connecton to the database.
+	conn,cursor = db_connect(db)
 
-    #Determine the id of the given codename
-    cursor.execute('SELECT id FROM sites WHERE code_name = ?', [codename])
-    site_id = cursor.fetchone()
-    if not site_id:
-        return 0,'THE GIVEN site DOES NOT APPEAR TO BE IN THE DATABASE.'
+	#Determine the id of the given codename
+	cursor.execute('SELECT id FROM sites WHERE code_name = ?', [codename])
+	site_id = cursor.fetchone()
+	if not site_id:
+	    return 0,'THE GIVEN site DOES NOT APPEAR TO BE IN THE DATABASE.'
 
-    #Open the ameriflux data file.
-    with open(data_path,'rb') as file:
+	#Open the ameriflux data file.
+	with open(data_path,'rb') as file:
 		reader = csv.reader(file,delimiter=',')
 
 		#skip the headerlines (maybe get info from later)
@@ -60,6 +60,32 @@ def import_L2_data(db,data_path,codename):
 
 		conn.commit()
 
-	def import_L4_data(db,data_path,codename):
-		#Inserts L4 data into an sqlite3 db
-		pass
+def import_L4_h_data(db,data_path,year,codename):
+	#Inserts L4 data into an sqlite3 db
+	# requires year for insert.
+	#Create a connecton to the database.
+	conn,cursor = db_connect(db)
+
+	#Determine the id of the given codename
+	cursor.execute('SELECT id FROM sites WHERE code_name = ?', [codename])
+	site_id = cursor.fetchone()
+	if not site_id:
+		return 0,'THE GIVEN site DOES NOT APPEAR TO BE IN THE DATABASE.'
+
+	#Open the ameriflux data file.
+	with open(data_path,'rb') as file:
+		reader = csv.reader(file,delimiter=',')
+
+		#skip the headerline
+		next(reader,None)
+
+		#Read each remaining line from the ameriflux file;
+		for row in reader:
+			#Add entries for year, site_id and the PK (NULL will be filled w/ rowid)
+			row.insert(0,year)
+			row.insert(0,site_id[0])
+			row.insert(0,None)
+			#37 total cols of data to insert for each record
+			cursor.execute('INSERT INTO L4_h VALUES (' + '?,'*36 + '?' + ');',row)
+
+	conn.commit()
