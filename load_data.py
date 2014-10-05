@@ -1,6 +1,6 @@
 #load_data contains the data loading functions.
 # Ameriflux data are inserted into an sqlite database.
-import sqlite3, csv, tempfile
+import sqlite3, csv, tempfile,utility
 
 def db_connect(db):
 	#Returns a database connectiton and cursor.
@@ -37,7 +37,7 @@ def import_L2_data(db,data_path,code_name):
 	conn,cursor = db_connect(db)
 
 	#Determine the id of the given codename
-	_,site_id = get_site_id(cursor,code_name)
+	_,site_id = utility.get_site_id(cursor,code_name)
 
 	#Open the ameriflux data file.
 	with open(data_path,'rb') as file:
@@ -64,7 +64,7 @@ def import_L4_h_data(db,data_path,year,code_name):
 	conn,cursor = db_connect(db)
 
 	#Determine the id of the given codename
-	status,site_id = get_site_id(cursor,code_name)
+	status,site_id = utility.get_site_id(cursor,code_name)
 
 	#Open the ameriflux data file.
 	with open(data_path,'rb') as file:
@@ -83,3 +83,26 @@ def import_L4_h_data(db,data_path,year,code_name):
 			cursor.execute('INSERT INTO L4_h VALUES (' + '?,'*36 + '?' + ');',row)
 
 	conn.commit()
+
+def load_from_dir(db,path):
+	#This function loads Ameriflux data in a directory into L2 and L4_h tables.
+	#	Note that sites for all all of the files to be loaded must already be
+	#	created in the sites table
+
+	#Get the Ameriflux data file names from the given dir
+	files = utility.get_ameriflux_filenames(path)
+
+	#Insert data from each file.
+	for file in files:
+		#Get info from each file
+		level,year,code_name = utility.get_fileparts(file)
+
+		if level in ['L2_GF','L2_WG']:
+			#level 2
+			import_L2_data(db,path+file,code_name)
+		elif level == 'L4_h':
+			#L4 hourly
+			import_L4_h_data(db,path+file,year,code_name)
+		else:
+			#Processing level not currently supported.
+			print path+file+' NOT ADDED TO DB (Processing level '+level+' not supported)'

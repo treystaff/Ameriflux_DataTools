@@ -21,4 +21,7 @@ def get_fileparts(filename):
 def get_ameriflux_filenames(path):
   #Returns the filenames matching ameriflux naming standard in a directory
   # defined by `path`
-  pass
+  file_paths = glob.glob(path + 'AMF_*')
+  files = [re.split('/',file_path)[-1] for file_path in file_paths]
+
+  return files
