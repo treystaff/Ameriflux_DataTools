@@ -30,17 +30,14 @@ def create_site(db,site,codename):
 		return 1,site_id
 
 
-def import_L2_data(db,data_path,codename):
+def import_L2_data(db,data_path,code_name):
 	#Inserts L2 data into an sqlite3 db.
 
 	#Create a connecton to the database.
 	conn,cursor = db_connect(db)
 
 	#Determine the id of the given codename
-	cursor.execute('SELECT id FROM sites WHERE code_name = ?', [codename])
-	site_id = cursor.fetchone()
-	if not site_id:
-	    return 0,'THE GIVEN site DOES NOT APPEAR TO BE IN THE DATABASE.'
+	_,site_id = get_site_id(cursor,code_name)
 
 	#Open the ameriflux data file.
 	with open(data_path,'rb') as file:
@@ -53,24 +50,21 @@ def import_L2_data(db,data_path,codename):
 		#Read each remaining line from the ameriflux file;
 		for row in reader:
 			#Add entries for site_id and the PK (NULL will be filled w/ rowid)
-			row.insert(0,site_id[0])
+			row.insert(0,site_id)
 			row.insert(0,None)
 			#47 total cols of data to insert for each record
 			cursor.execute('INSERT INTO L2 VALUES (' + '?,'*46 + '?' + ');',row)
 
 		conn.commit()
 
-def import_L4_h_data(db,data_path,year,codename):
+def import_L4_h_data(db,data_path,year,code_name):
 	#Inserts L4 data into an sqlite3 db
 	# requires year for insert.
 	#Create a connecton to the database.
 	conn,cursor = db_connect(db)
 
 	#Determine the id of the given codename
-	cursor.execute('SELECT id FROM sites WHERE code_name = ?', [codename])
-	site_id = cursor.fetchone()
-	if not site_id:
-		return 0,'THE GIVEN site DOES NOT APPEAR TO BE IN THE DATABASE.'
+	status,site_id = get_site_id(cursor,code_name)
 
 	#Open the ameriflux data file.
 	with open(data_path,'rb') as file:
@@ -83,7 +77,7 @@ def import_L4_h_data(db,data_path,year,codename):
 		for row in reader:
 			#Add entries for year, site_id and the PK (NULL will be filled w/ rowid)
 			row.insert(0,year)
-			row.insert(0,site_id[0])
+			row.insert(0,site_id)
 			row.insert(0,None)
 			#37 total cols of data to insert for each record
 			cursor.execute('INSERT INTO L4_h VALUES (' + '?,'*36 + '?' + ');',row)
